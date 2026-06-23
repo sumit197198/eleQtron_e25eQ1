@@ -11,58 +11,64 @@ def read_inputs_from_txt_file(txt_filepath):
 
 
 def create_preferences_dict(preferences):
-
     cust_pref_dict = {}
-    for i in range (0, len(preferences)):
+    for i in range(0, len(preferences)):
         cust_pref_dict['C' + str(i)] = preferences[i].split(',')
 
     return cust_pref_dict
 
 
 def update_itinerary(default_itinerary, dict_unsatisfied_cust):
+    satisfied_cust_list = []
+    unsatisfied_cust_list = []
     default_itinerary
-    dict_unsatisfied_cust
+    for cust, pref in dict_unsatisfied_cust.items():
 
+        for i in range(0, len(pref)):
 
+            if pref[i].strip() in default_itinerary:
+                print(f'customer {cust} is satisfied' )
+                satisfied_cust_list.append(cust)
+                break
 
-
-    print('wait')
+    for cust in satisfied_cust_list:
+        dict_unsatisfied_cust.pop(cust)
 
     return default_itinerary, dict_unsatisfied_cust
 
 
-
-
-
 def create_final_itinerary(H, cust_pref_dict):
-
     default_itinerary = [f'{i} by-sea' for i in range(H)]
+    dict_unsatisfied_cust = {}
+    dict_satisfied_cust = {}
 
     for cust, pref in cust_pref_dict.items():
-        dict_unsatisfied_cust= {}
-        dict_satisfied_cust= {}
-        dict_unsatisfied_cust.update({cust:[pref]})
-        if len(pref) == 1:
-            hop_no= int(pref[0].split(' ')[0])
-            default_itinerary[hop_no] = pref[0] # Set that perticular itn to airborne
-            print(cust, pref, 'satisfied')
-            dict_satisfied_cust.update({cust: [pref]})
 
-    dict_unsatisfied_cust
+        if len(pref) == 1 and 'airborne' in pref[0].split(' '):
+            hop_no = int(pref[0].split(' ')[0])
+            default_itinerary[hop_no] = pref[0]  # Set that perticular itn to airborne
+            print(f'customer {cust} is satisfied')
+            dict_satisfied_cust.update({cust: pref})
 
-    update_itinerary(default_itinerary, dict_unsatisfied_cust)
+        else:
+            dict_unsatisfied_cust.update({cust: pref})
+
+    while len(dict_unsatisfied_cust) > 0:
+        default_itinerary, dict_unsatisfied_cust = update_itinerary(default_itinerary, dict_unsatisfied_cust)
 
 
-    return default_itinerary
+    print('all customers are satisfied')
+    final_itinerary = default_itinerary
 
+    return final_itinerary
 
 
 if __name__ == '__main__':
     txt_filepath = r'input_data.txt'
 
     H, C, preferences = read_inputs_from_txt_file(txt_filepath)
-    cust_pref_dict= create_preferences_dict(preferences)
+    cust_pref_dict = create_preferences_dict(preferences)
 
     final_itinerary = create_final_itinerary(H, cust_pref_dict)
 
-    print('done')
+    print(final_itinerary)
