@@ -1,4 +1,4 @@
-# e25eQ1- Coading challange
+# e25eQ1- Coding Challange
 
 def read_inputs_from_txt_file(txt_filepath):
     with open(txt_filepath, 'r') as f:
@@ -13,46 +13,66 @@ def read_inputs_from_txt_file(txt_filepath):
 def create_preferences_dict(preferences):
     cust_pref_dict = {}
     for i in range(0, len(preferences)):
-        cust_pref_dict['C' + str(i)] = preferences[i].split(',')
+        cust_pref_dict['C' + str(i)] = preferences[i].split(', ')
 
     return cust_pref_dict
 
 
 def update_itinerary(default_itinerary, dict_unsatisfied_cust):
     satisfied_cust_list = []
+    default_itinerary_changed = False
 
-    for cust, pref in dict_unsatisfied_cust.items():
+    for customer_id, pref in dict_unsatisfied_cust.items():
         for i in range(0, len(pref)):
 
             if pref[i].strip() in default_itinerary:
-                print(f'customer {cust} is satisfied')
-                satisfied_cust_list.append(cust)
+                print(f'customer {customer_id} is satisfied')
+                satisfied_cust_list.append(customer_id)
                 break
 
-    for cust in satisfied_cust_list:
-        dict_unsatisfied_cust.pop(cust)
+    for customer_id in satisfied_cust_list:
+        dict_unsatisfied_cust.pop(customer_id)
 
     satisfied_cust_list = []
-    for cust, pref in dict_unsatisfied_cust.items():
+    for customer_id, pref in dict_unsatisfied_cust.items():
         for i in range(0, len(pref)):
 
             if 'airborne' in pref[i].strip().split(' '):
                 hop_no = int(pref[i].strip().split(' ')[0])
-                default_itinerary[hop_no] = f' {hop_no} airborne'
-                print(f'customer {cust} is satisfied --> changed hop {hop_no} to airborne')
-                satisfied_cust_list.append(cust)
+                default_itinerary[hop_no] = f'{hop_no} airborne'
+                default_itinerary_changed = True
+                print(f'customer {customer_id} is satisfied --> changed hop {hop_no} to airborne')
+                satisfied_cust_list.append(customer_id)
                 break
 
-    for cust in satisfied_cust_list:
-        dict_unsatisfied_cust.pop(cust)
+    for customer_id in satisfied_cust_list:
+        dict_unsatisfied_cust.pop(customer_id)
 
-    return default_itinerary, dict_unsatisfied_cust
+    if len(dict_unsatisfied_cust) > 0 and len(satisfied_cust_list) == 0 and default_itinerary_changed == False:
+        return 'NO ITINERARY'
+
+    return default_itinerary
+
+
+def create_unsatisfied_customer_list(default_itinerary, customer_preferences_dict):
+    unsatisfied_customers = {}
+    for customer_id, pref in customer_preferences_dict.items():
+        customer_satisfied = False
+
+        for i in range(0, len(pref)):
+            if pref[i].strip() in default_itinerary:
+                customer_satisfied = True
+                break
+        if customer_satisfied == False:
+            unsatisfied_customers[customer_id] = pref
+
+    return unsatisfied_customers
 
 
 def create_final_itinerary(H, cust_pref_dict):
     default_itinerary = [f'{i} by-sea' for i in range(H)]
-    dict_unsatisfied_cust = {}
-    dict_satisfied_cust = {}
+    unsatisfied_customers = {}
+    satisfied_customers = {}
 
     for cust, pref in cust_pref_dict.items():
 
@@ -60,15 +80,19 @@ def create_final_itinerary(H, cust_pref_dict):
             hop_no = int(pref[0].split(' ')[0])
             default_itinerary[hop_no] = pref[0]  # Set that perticular itn to airborne
             print(f'customer {cust} is satisfied --> unique airborne preference')
-            dict_satisfied_cust.update({cust: pref})
+            satisfied_customers.update({cust: pref})
 
         else:
-            dict_unsatisfied_cust.update({cust: pref})
+            unsatisfied_customers.update({cust: pref})
 
-    while len(dict_unsatisfied_cust) > 0:
-        default_itinerary, dict_unsatisfied_cust = update_itinerary(default_itinerary, dict_unsatisfied_cust)
+    while len(unsatisfied_customers) > 0:
+        default_itinerary = update_itinerary(default_itinerary, unsatisfied_customers)
         if default_itinerary == "NO ITINERARY":
             return "NO ITINERARY"
+
+        # If there are still unsatisfied customer because of this then please get the unsatisfied customer list
+
+        unsatisfied_customers = create_unsatisfied_customer_list(default_itinerary, cust_pref_dict)
 
     print('all customers are satisfied')
     final_itinerary = default_itinerary
@@ -77,11 +101,9 @@ def create_final_itinerary(H, cust_pref_dict):
 
 
 if __name__ == '__main__':
-    txt_filepath = r'input_data1.txt'
-
+    txt_filepath = r'input_data.txt'
     H, C, preferences = read_inputs_from_txt_file(txt_filepath)
-    cust_pref_dict = create_preferences_dict(preferences)
+    customer_preferences_dict = create_preferences_dict(preferences)
+    final_itinerary = create_final_itinerary(H, customer_preferences_dict)
 
-    final_itinerary = create_final_itinerary(H, cust_pref_dict)
-
-    print('final_itinerary =', final_itinerary)
+    print(final_itinerary)
