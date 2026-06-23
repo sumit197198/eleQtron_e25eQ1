@@ -1,0 +1,8 @@
+7
+6
+0 by-sea, 2 by-sea, 3 by-sea
+0 by-sea, 5 airborne
+0 airborne, 5 by-sea
+2 airborne, 4 by-sea
+1 airborne
+1 by-sea, 4 airborne

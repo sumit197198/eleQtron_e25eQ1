@@ -20,14 +20,26 @@ def create_preferences_dict(preferences):
 
 def update_itinerary(default_itinerary, dict_unsatisfied_cust):
     satisfied_cust_list = []
-    unsatisfied_cust_list = []
-    default_itinerary
-    for cust, pref in dict_unsatisfied_cust.items():
 
+    for cust, pref in dict_unsatisfied_cust.items():
         for i in range(0, len(pref)):
 
             if pref[i].strip() in default_itinerary:
-                print(f'customer {cust} is satisfied' )
+                print(f'customer {cust} is satisfied')
+                satisfied_cust_list.append(cust)
+                break
+
+    for cust in satisfied_cust_list:
+        dict_unsatisfied_cust.pop(cust)
+
+    satisfied_cust_list = []
+    for cust, pref in dict_unsatisfied_cust.items():
+        for i in range(0, len(pref)):
+
+            if 'airborne' in pref[i].strip().split(' '):
+                hop_no = int(pref[i].strip().split(' ')[0])
+                default_itinerary[hop_no] = f' {hop_no} airborne'
+                print(f'customer {cust} is satisfied --> changed hop {hop_no} to airborne')
                 satisfied_cust_list.append(cust)
                 break
 
@@ -47,7 +59,7 @@ def create_final_itinerary(H, cust_pref_dict):
         if len(pref) == 1 and 'airborne' in pref[0].split(' '):
             hop_no = int(pref[0].split(' ')[0])
             default_itinerary[hop_no] = pref[0]  # Set that perticular itn to airborne
-            print(f'customer {cust} is satisfied')
+            print(f'customer {cust} is satisfied --> unique airborne preference')
             dict_satisfied_cust.update({cust: pref})
 
         else:
@@ -55,7 +67,8 @@ def create_final_itinerary(H, cust_pref_dict):
 
     while len(dict_unsatisfied_cust) > 0:
         default_itinerary, dict_unsatisfied_cust = update_itinerary(default_itinerary, dict_unsatisfied_cust)
-
+        if default_itinerary == "NO ITINERARY":
+            return "NO ITINERARY"
 
     print('all customers are satisfied')
     final_itinerary = default_itinerary
@@ -64,11 +77,11 @@ def create_final_itinerary(H, cust_pref_dict):
 
 
 if __name__ == '__main__':
-    txt_filepath = r'input_data.txt'
+    txt_filepath = r'input_data1.txt'
 
     H, C, preferences = read_inputs_from_txt_file(txt_filepath)
     cust_pref_dict = create_preferences_dict(preferences)
 
     final_itinerary = create_final_itinerary(H, cust_pref_dict)
 
-    print(final_itinerary)
+    print('final_itinerary =', final_itinerary)
