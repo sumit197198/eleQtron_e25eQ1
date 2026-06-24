@@ -1,4 +1,12 @@
 # e25eQ1- Coding Challange
+import logging
+import sys
+
+
+def setup_logger():
+    logging.basicConfig(level=logging.INFO, format="%(message)s",
+        handlers=[logging.FileHandler("program.log", mode="w"), logging.StreamHandler(sys.stderr)], force=True)
+
 
 def read_inputs_from_txt_file(txt_filepath):
     with open(txt_filepath, 'r') as f:
@@ -26,7 +34,7 @@ def update_itinerary(default_itinerary, dict_unsatisfied_cust):
         for i in range(0, len(pref)):
 
             if pref[i].strip() in default_itinerary:
-                print(f'customer {customer_id} is satisfied')
+                logging.info(f'customer {customer_id} is satisfied')
                 satisfied_cust_list.append(customer_id)
                 break
 
@@ -41,7 +49,7 @@ def update_itinerary(default_itinerary, dict_unsatisfied_cust):
                 hop_no = int(pref[i].strip().split(' ')[0])
                 default_itinerary[hop_no] = f'{hop_no} airborne'
                 default_itinerary_changed = True
-                print(f'customer {customer_id} is satisfied --> changed hop {hop_no} to airborne')
+                logging.info(f'customer {customer_id} is satisfied --> changed hop {hop_no} to airborne')
                 satisfied_cust_list.append(customer_id)
                 break
 
@@ -79,7 +87,8 @@ def create_final_itinerary(H, cust_pref_dict):
         if len(pref) == 1 and 'airborne' in pref[0].split(' '):
             hop_no = int(pref[0].split(' ')[0])
             default_itinerary[hop_no] = pref[0]  # Set that perticular itn to airborne
-            print(f'customer {cust} is satisfied --> unique airborne preference')
+            logging.info(f'customer {cust} is satisfied --> unique airborne preference')
+
             satisfied_customers.update({cust: pref})
 
         else:
@@ -94,16 +103,24 @@ def create_final_itinerary(H, cust_pref_dict):
 
         unsatisfied_customers = create_unsatisfied_customer_list(default_itinerary, cust_pref_dict)
 
-    print('all customers are satisfied')
+    logging.info('all customers are satisfied')
     final_itinerary = default_itinerary
 
     return final_itinerary
 
 
 if __name__ == '__main__':
+    setup_logger()
     txt_filepath = r'input_data.txt'
+
+    logging.info("Reading input file")
     H, C, preferences = read_inputs_from_txt_file(txt_filepath)
     customer_preferences_dict = create_preferences_dict(preferences)
     final_itinerary = create_final_itinerary(H, customer_preferences_dict)
 
-    print(final_itinerary)
+    if type(final_itinerary) == str: # NO ITINERARY
+        print(final_itinerary)
+    else:
+        print(", ".join(final_itinerary))
+
+    logging.info("Program execution completed")
